@@ -11,6 +11,33 @@ export class Users {
   fullName?: string;
 
   @ApiPropertyOptional({ type: String })
+  avatar?: string;
+
+  @ApiPropertyOptional({ type: String })
+  phone?: string;
+
+  @ApiPropertyOptional({ type: String })
+  dateOfBirth?: string;
+
+  @ApiPropertyOptional({ type: String })
+  gender?: string;
+
+  @ApiPropertyOptional({ type: String })
+  bio?: string;
+
+  @ApiPropertyOptional({ type: String })
+  school?: string;
+
+  @ApiPropertyOptional({ type: String })
+  major?: string;
+
+  @ApiPropertyOptional({ type: String })
+  targetRole?: string;
+
+  @ApiPropertyOptional({ type: String })
+  address?: string;
+
+  @ApiPropertyOptional({ type: String })
   passwordHash?: string;
 
   @ApiPropertyOptional({ type: String, example: 'users' })

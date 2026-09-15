@@ -24,7 +24,7 @@ export class UsersService {
         email: input.email.toLowerCase(),
         fullName: input.fullName,
         passwordHash: input.passwordHash,
-        role: input.role ?? 'student',
+        role: input.role ?? 'users',
       },
     });
 
@@ -33,11 +33,11 @@ export class UsersService {
 
   async findAll(): Promise<SafeUser[]> {
     const users = await this.prisma.users.findMany();
-    return users.map(user => this.toSafeUser(user));
+    return users.map((user) => this.toSafeUser(user));
   }
 
   async findById(id: string): Promise<SafeUser | null> {
-    if (!id || id.length !== 24) return null; // MongoDB ObjectId length check
+    if (!id || id.length !== 24) return null;
 
     const user = await this.prisma.users.findUnique({
       where: { id },
