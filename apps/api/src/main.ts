@@ -33,6 +33,6 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`😎 Server is running on: http://localhost:${port}`);
   console.log(`🤷 Swagger documentation at: http://localhost:${port}/docs`);
-  console.log(`🔐 Login endpoint at: http://localhost:${port}/api/auth/login`);
+  
 }
 await bootstrap();

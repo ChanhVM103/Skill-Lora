@@ -6,7 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TokenExpiredError } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { TokenExpiredError } = jwt;
 import { TokenService } from '../../modules-system/token/token.service.js';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
 import { Reflector } from '@nestjs/core';
@@ -44,7 +45,7 @@ export class ProtectGuard implements CanActivate {
         },
       });
       if (!userExists) {
-        throw new UnauthorizedException('Không tìm thấy user');
+        throw new UnauthorizedException('User not found');
       }
 
       (request as any)['user'] = userExists;
