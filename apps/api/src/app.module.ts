@@ -5,8 +5,9 @@ import { AppService } from './app.service.js';
 import { PrismaModule } from './modules-system/prisma/prisma.module.js';
 import { TokenModule } from './modules-system/token/token.module.js';
 import { ApiKeyModule } from './modules-system/apikey/apikey.module.js';
-import { AuthModule } from './modules-api/users/auth/auth.module.js';
+import { AuthModule } from './modules-api/auth/auth.module.js';
 import { UsersModule } from './modules-api/users/users.module.js';
+import { ProfileModule } from './modules-api/profile/profile.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersModule } from './modules-api/users/users.module.js';
     ApiKeyModule,
     AuthModule,
     UsersModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
