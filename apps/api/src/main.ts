@@ -7,7 +7,14 @@ import { AppModule } from './app.module.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.setGlobalPrefix('api');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Skillora API')
@@ -16,12 +23,16 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, swaggerDocument);
+  SwaggerModule.setup('docs', app, swaggerDocument, {
+    swaggerOptions: {
+      defaultModelsExpandDepth: -1,
+    },
+  });
 
-  const port = Number(process.env.PORT ?? 3000);
+  const port = Number(process.env.PORT ?? 3069);
   await app.listen(port);
-  console.log(`✅ MongoDB Connected successfully`);
-  console.log(`😎 Skillora API is running on Port : ${port}`);
-  console.log(`🤷 Swagger docs: http://localhost:${port}/docs`);
+  console.log(`😎 Server is running on: http://localhost:${port}`);
+  console.log(`🤷 Swagger documentation at: http://localhost:${port}/docs`);
+  console.log(`🔐 Login endpoint at: http://localhost:${port}/api/auth/login`);
 }
 await bootstrap();
