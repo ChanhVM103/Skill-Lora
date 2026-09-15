@@ -13,8 +13,8 @@ export class Users {
   @ApiPropertyOptional({ type: String })
   passwordHash?: string;
 
-  @ApiPropertyOptional({ type: String, example: 'student' })
-  role?: string = 'student';
+  @ApiPropertyOptional({ type: String, example: 'users' })
+  role?: string = 'users';
 
   @ApiProperty({ type: Date })
   createdAt: Date;
