@@ -8,11 +8,13 @@ import { ApiKeyModule } from './modules-system/apikey/apikey.module.js';
 import { AuthModule } from './modules-api/auth/auth.module.js';
 import { UsersModule } from './modules-api/users/users.module.js';
 import { ProfileModule } from './modules-api/profile/profile.module.js';
+import { RoadmapModule } from './roadmap/roadmap.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', 'apps/api/.env'],
     }),
     PrismaModule,
     TokenModule,
@@ -20,6 +22,7 @@ import { ProfileModule } from './modules-api/profile/profile.module.js';
     AuthModule,
     UsersModule,
     ProfileModule,
+    RoadmapModule,
   ],
   controllers: [AppController],
   providers: [AppService],
