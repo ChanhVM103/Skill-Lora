@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import ytSearch from 'yt-search';
 import {
   CurrentLevel,
   GapCategory,
@@ -51,6 +54,8 @@ type MatchedResources = {
 
 @Injectable()
 export class RoadmapService {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
   async generateRoadmap(
     request: GenerateRoadmapRequestDto,
   ): Promise<RoadmapResponseDto> {
@@ -72,15 +77,42 @@ export class RoadmapService {
       phases,
       scoredGaps,
     );
+
+    const cacheKey = `ai_plan_${request.target_role}_${startingLevel}_${improvementItems.map((i) => i.skill_id).sort().join('_')}`;
+    const cachedPlan = await this.cacheManager.get<FourWeekPlanDto[]>(cacheKey);
+
     const aiPrompt = this.buildGeminiPrompt(
       request,
       improvementItems,
-      externalCourseSuggestions,
     );
-    const aiGeneration = await this.generateGeminiFourWeekPlan(
-      aiPrompt,
-      improvementItems,
-      fallbackFourWeekPlan,
+
+    let aiGeneration: {
+      plan: FourWeekPlanDto[] | null;
+      status: AiGenerationStatus;
+      error: string | null;
+    };
+
+    if (cachedPlan) {
+      aiGeneration = {
+        plan: cachedPlan,
+        status: AiGenerationStatus.Generated,
+        error: null,
+      };
+    } else {
+      aiGeneration = await this.generateGeminiFourWeekPlan(
+        aiPrompt,
+        improvementItems,
+        fallbackFourWeekPlan,
+      );
+
+      // Only cache if the plan was successfully generated and not the fallback
+      if (aiGeneration.plan && aiGeneration.status === AiGenerationStatus.Generated) {
+        await this.cacheManager.set(cacheKey, aiGeneration.plan, 1000 * 60 * 60 * 24 * 7); // Cache for 7 days
+      }
+    }
+
+    const finalPlan = await this.populateYouTubeVideos(
+      aiGeneration.plan ?? fallbackFourWeekPlan,
     );
 
     return {
@@ -90,7 +122,7 @@ export class RoadmapService {
       estimated_duration_weeks: 4,
       improvement_items: improvementItems,
       phases,
-      four_week_plan: aiGeneration.plan ?? fallbackFourWeekPlan,
+      four_week_plan: finalPlan,
       lesson_source: aiGeneration.plan
         ? LessonSource.AiGenerated
         : LessonSource.BackendFallback,
@@ -359,26 +391,25 @@ export class RoadmapService {
   private buildGeminiPrompt(
     request: GenerateRoadmapRequestDto,
     improvementItems: ImprovementItemDto[],
-    externalCourses: ExternalCourseSuggestionDto[],
   ): string {
     const roleProfile = roleProfiles[request.target_role];
+    const optimizedItems = improvementItems.map((item) => ({
+      id: item.skill_id,
+      name: item.skill_name,
+      week: item.recommended_week,
+    }));
     const payload = {
-      target_role: request.target_role,
-      role_display_name: roleProfile.displayName,
-      starting_level: request.starting_level ?? StartingLevel.Beginner,
-      fixed_duration_weeks: 4,
-      improvement_items: improvementItems,
-      external_course_suggestions: externalCourses,
-      strict_rules: [
-        'Do not add skills that are not listed in improvement_items.',
-        'Do not change improvement_score, severity, current_level, or recommended_week.',
-        'Use recommended_week as the priority start week for each skill. You may continue the same allowed skill in later weeks for practice and deliverables.',
-        'Generate lesson titles, activities, practice tasks, deliverables, and optional course usage only.',
-        'Prefer teacher resources when teacher resource ids are available.',
-        'External courses are optional suggestions, not mandatory requirements.',
+      role: roleProfile.displayName,
+      level: request.starting_level ?? StartingLevel.Beginner,
+      skills_to_learn: optimizedItems,
+      rules: [
+        'Do not add skills not listed in skills_to_learn.',
+        'Use the provided week as the start week for each skill.',
+        'Generate exactly 1 lesson per week.',
+        'For each lesson, you MUST provide exactly 1 youtube_search_query that strictly matches the lesson\'s specific topic.',
         'Return valid JSON only. No markdown.',
       ],
-      required_json_shape: {
+      expected_json: {
         weeks: [
           {
             week: 1,
@@ -387,18 +418,12 @@ export class RoadmapService {
             lessons: [
               {
                 title: 'string',
-                skill_id: 'string',
+                skill_id: 'string (must match original skill_id from input)',
                 skill_name: 'string',
                 activity: 'string',
                 practice: 'string',
                 deliverable: 'string',
-                suggested_external_courses: [
-                  {
-                    provider: 'string',
-                    search_query: 'string',
-                    search_url: 'string',
-                  },
-                ],
+                youtube_search_query: 'string',
               },
             ],
           },
@@ -406,7 +431,7 @@ export class RoadmapService {
       },
     };
 
-    return `Create a 4-week learning roadmap from the locked backend scoring payload. Follow the strict rules exactly. Payload: ${JSON.stringify(payload)}`;
+    return `Generate a 4-week learning roadmap based on this payload: ${JSON.stringify(payload)}`;
   }
 
   private async generateGeminiFourWeekPlan(
@@ -430,34 +455,60 @@ export class RoadmapService {
 
     try {
       const model = process.env.GEMINI_MODEL ?? 'gemini-3.6-flash';
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: prompt }],
-              },
-            ],
-            generationConfig: {
-              response_mime_type: 'application/json',
-              temperature: 0.4,
-            },
-          }),
-        },
-      );
+      let response: Response | undefined;
+      let attempt = 0;
+      const maxRetries = 3;
 
-      if (!response.ok) {
-        const errorText = await response.text();
+      while (attempt < maxRetries) {
+        try {
+          response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [{ text: prompt }],
+                  },
+                ],
+                generationConfig: {
+                  response_mime_type: 'application/json',
+                  temperature: 0.4,
+                },
+              }),
+            },
+          );
+
+          if (response.ok) {
+            break; // Success
+          }
+
+          if (response.status === 503 || response.status === 429) {
+            attempt++;
+            if (attempt < maxRetries) {
+              await new Promise((res) => setTimeout(res, 2000 * attempt));
+              continue;
+            }
+          }
+          break; // Break on other errors or max retries
+        } catch (fetchError) {
+          attempt++;
+          if (attempt >= maxRetries) throw fetchError;
+          await new Promise((res) => setTimeout(res, 2000 * attempt));
+        }
+      }
+
+      if (!response || !response.ok) {
+        const errorText = response ? await response.text() : 'Network error or max retries exceeded.';
+        const statusCode = response ? response.status : 500;
         return {
           plan: null,
           status: AiGenerationStatus.RequestFailed,
-          error: this.sanitizeGeminiError(response.status, errorText),
+          error: this.sanitizeGeminiError(statusCode, errorText),
         };
       }
 
@@ -536,11 +587,7 @@ export class RoadmapService {
           activity?: string;
           practice?: string;
           deliverable?: string;
-          suggested_external_courses?: Array<{
-            provider?: string;
-            search_query?: string;
-            search_url?: string;
-          }>;
+          youtube_search_query?: string;
         }>;
       }>;
     };
@@ -563,15 +610,17 @@ export class RoadmapService {
             practice: lesson.practice ?? '',
             deliverable: lesson.deliverable ?? '',
             teacher_resources: [],
-            external_courses: Array.isArray(lesson.suggested_external_courses)
-              ? lesson.suggested_external_courses.map((course) => ({
-                  skill_id: lesson.skill_id ?? '',
-                  skill_name: lesson.skill_name ?? '',
-                  provider: course.provider ?? 'External provider',
-                  search_query: course.search_query ?? '',
-                  search_url: course.search_url ?? '',
-                  note: 'Optional external course suggested by Gemini.',
-                }))
+            external_courses: lesson.youtube_search_query
+              ? [
+                  {
+                    skill_id: lesson.skill_id ?? '',
+                    skill_name: lesson.skill_name ?? '',
+                    provider: 'YouTube Search Query',
+                    search_query: lesson.youtube_search_query,
+                    search_url: '',
+                    note: 'Internal query to be resolved',
+                  },
+                ]
               : [],
           }))
         : [],
@@ -603,6 +652,51 @@ export class RoadmapService {
       });
     });
   }
+
+  private async populateYouTubeVideos(
+    plan: FourWeekPlanDto[],
+  ): Promise<FourWeekPlanDto[]> {
+    const fetchPromises = plan.flatMap((week) =>
+      week.lessons.map(async (lesson) => {
+        if (
+          !lesson.external_courses ||
+          lesson.external_courses.length === 0 ||
+          lesson.external_courses[0].provider !== 'YouTube Search Query'
+        ) {
+          return;
+        }
+
+        const query = lesson.external_courses[0].search_query;
+        let videos = await this.cacheManager.get<any[]>(`yt_${query}`);
+
+        if (!videos) {
+          try {
+            const result = await ytSearch(query);
+            videos = result.videos.slice(0, 3).map((v) => ({
+              title: v.title,
+              url: v.url,
+            }));
+            await this.cacheManager.set(`yt_${query}`, videos, 1000 * 60 * 60 * 24); // Cache 1 day
+          } catch (e) {
+            videos = [];
+          }
+        }
+
+        lesson.external_courses = (videos || []).map((v) => ({
+          skill_id: lesson.skill_id,
+          skill_name: lesson.skill_name,
+          provider: 'YouTube',
+          search_query: query,
+          search_url: v.url,
+          note: v.title,
+        }));
+      }),
+    );
+
+    await Promise.all(fetchPromises);
+    return plan;
+  }
+
   private matchResources(
     gap: ScoredGap,
     resources: RoadmapResourceDto[],
