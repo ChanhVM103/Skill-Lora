@@ -10,6 +10,8 @@ import { UsersModule } from './modules-api/users/users.module.js';
 import { ProfileModule } from './modules-api/profile/profile.module.js';
 import { RoadmapModule } from './roadmap/roadmap.module.js';
 import { CvModule } from './modules-api/cv/cv.module.js';
+import { ResourcesModule } from './resources/resources.module.js';
+import { AnalysisModule } from './analysis/analysis.module.js';
 
 @Module({
   imports: [
@@ -24,8 +26,12 @@ import { CvModule } from './modules-api/cv/cv.module.js';
     UsersModule,
     ProfileModule,
     RoadmapModule,
+    AnalysisModule,
+    ResourcesModule,
     CvModule,
   ],
+
+
   controllers: [AppController],
   providers: [AppService],
 })

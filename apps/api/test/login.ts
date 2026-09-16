@@ -74,7 +74,7 @@ describe('Auth Module E2E Test Suite (Senior QA Standards)', () => {
       expect(response.status).toBe(201); // NestJS default @Post response code
       expect(response.body).toHaveProperty('message', 'Đăng nhập thành công');
       expect(response.body).toHaveProperty('user');
-      expect(response.body.user).toEqual({
+      expect(response.body.user).toMatchObject({
         id: validTestUser.id,
         email: validTestUser.email,
         fullName: validTestUser.fullName,

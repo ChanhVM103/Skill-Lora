@@ -92,31 +92,6 @@ export class CvController {
     return this.cvService.submitAnswersAndEvaluate(id, dto);
   }
 
-  /**
-   * Priority / Legacy Endpoint Wrapper: POST /analyses
-   */
-  @ApiOperation({
-    summary: 'Khởi tạo Đánh giá CV (Call 1 Wrapper)',
-    description: 'Endpoint tương thích nhận file CV và target_role, thực hiện Call 1.',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiResponse({
-    status: 201,
-    type: BaselineResponseDto,
-  })
-  @Post('analyses')
-  @UseInterceptors(FileInterceptor('cv_file'))
-  async analyzeCv(
-    @Req() req: Request,
-    @UploadedFile() file: any,
-    @Body() dto: CreateBaselineDto,
-  ): Promise<BaselineResponseDto> {
-    if (!file) {
-      throw new BadRequestException('Vui lòng tải lên file CV (cv_file)');
-    }
-    const userId = (req as any).user?.id;
-    return this.cvService.createBaselineAndQuestions(file, dto, userId);
-  }
 
   /**
    * Alias Endpoint: POST /cv/analyze
@@ -166,11 +141,6 @@ export class CvController {
   @ApiOperation({ summary: 'Lấy chi tiết phiên phân tích CV theo ID' })
   @Get('cv/history/:id')
   async getCvAnalysisById(@Param('id') id: string) {
-    return this.cvService.getCvAnalysisById(id);
-  }
-
-  @Get('analyses/:id')
-  async getAnalysisById(@Param('id') id: string) {
     return this.cvService.getCvAnalysisById(id);
   }
 
