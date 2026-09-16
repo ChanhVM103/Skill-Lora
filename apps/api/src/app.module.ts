@@ -9,6 +9,7 @@ import { AuthModule } from './modules-api/auth/auth.module.js';
 import { UsersModule } from './modules-api/users/users.module.js';
 import { ProfileModule } from './modules-api/profile/profile.module.js';
 import { RoadmapModule } from './roadmap/roadmap.module.js';
+import { CvModule } from './modules-api/cv/cv.module.js';
 
 @Module({
   imports: [
@@ -23,8 +24,10 @@ import { RoadmapModule } from './roadmap/roadmap.module.js';
     UsersModule,
     ProfileModule,
     RoadmapModule,
+    CvModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

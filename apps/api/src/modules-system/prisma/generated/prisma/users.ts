@@ -1,3 +1,4 @@
+import { CvAnalysis, type CvAnalysis as CvAnalysisAsType } from './cv_analysis';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class Users {
@@ -51,4 +52,7 @@ export class Users {
 
   @ApiPropertyOptional({ type: Number })
   v?: number;
+
+  @ApiProperty({ isArray: true, type: () => CvAnalysis })
+  cvAnalyses: CvAnalysisAsType[];
 }
