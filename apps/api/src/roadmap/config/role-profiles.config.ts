@@ -58,7 +58,37 @@ export const roleProfiles: Record<TargetRole, RoleProfile> = {
       { skillId: 'testing', importance: 3, targetLevel: TargetLevel.Basic },
     ],
   },
-  [TargetRole.AiEngineer]: {
+  [TargetRole.FrontendReactjs]: {
+    displayName: 'Frontend ReactJS Engineer',
+    domain: 'frontend',
+    requiredSkills: [
+      {
+        skillId: 'react_fiber_concurrent',
+        importance: 5,
+        targetLevel: TargetLevel.Advanced,
+      },
+      {
+        skillId: 'web_vitals_bundle_splitting',
+        importance: 5,
+        targetLevel: TargetLevel.Advanced,
+      },
+      {
+        skillId: 'frontend_testing_cicd',
+        importance: 4,
+        targetLevel: TargetLevel.Intermediate,
+      },
+      {
+        skillId: 'micro_frontend_architecture',
+        importance: 4,
+        targetLevel: TargetLevel.Advanced,
+      },
+      {
+        skillId: 'technical_english_communication',
+        importance: 3,
+        targetLevel: TargetLevel.Intermediate,
+      },
+    ],
+  },  [TargetRole.AiEngineer]: {
     displayName: 'AI Engineer',
     domain: 'ai',
     requiredSkills: [
@@ -122,3 +152,4 @@ export const roleProfiles: Record<TargetRole, RoleProfile> = {
     ],
   },
 };
+

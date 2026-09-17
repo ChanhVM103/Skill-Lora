@@ -126,6 +126,10 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             { subject: 'Độ khớp yêu cầu', score: realResult.scores?.match_percentage ?? 65, fullMark: 100 },
             { subject: 'Kỹ năng cốt lõi', score: Math.min(100, Math.round(((realResult.existing_skills?.length || 4) / ((realResult.existing_skills?.length || 4) + (realResult.missing_skills?.length || 3))) * 100)), fullMark: 100 },
           ],
+          actionableLevelUpBlueprint:
+            realResult.actionable_level_up_blueprint ||
+            realResult.part_2_cv_content_and_level_assessment?.actionable_level_up_blueprint ||
+            null,
         };
         onAnalysisComplete(analysisResult);
       }, 500);
@@ -426,3 +430,4 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     </div>
   );
 };
+

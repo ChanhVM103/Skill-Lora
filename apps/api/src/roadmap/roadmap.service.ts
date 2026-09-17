@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import ytSearch from 'yt-search';
@@ -61,8 +61,9 @@ export class RoadmapService {
   ): Promise<RoadmapResponseDto> {
     const startingLevel = request.starting_level ?? StartingLevel.Beginner;
     const resources = request.resources ?? [];
+    const effectiveGapItems = this.resolveGapItems(request);
     const scoredGaps = this.assignWeeks(
-      this.withTransitionGapIfNeeded(this.scoreGaps(request), startingLevel),
+      this.withTransitionGapIfNeeded(this.scoreGaps(request, effectiveGapItems), startingLevel),
     );
     const improvementItems = this.toImprovementItems(scoredGaps);
     const phases = this.buildPhases(scoredGaps, resources);
@@ -132,10 +133,89 @@ export class RoadmapService {
       resource_gap_alerts: resourceGapAlerts,
     };
   }
-  private scoreGaps(request: GenerateRoadmapRequestDto): ScoredGap[] {
+  private resolveGapItems(request: GenerateRoadmapRequestDto): RoadmapGapItemDto[] {
+    if (request.gap_items?.length) {
+      return request.gap_items;
+    }
+
+    const blueprintGaps = this.toGapItemsFromBlueprint(request);
+    if (blueprintGaps.length > 0) {
+      return blueprintGaps;
+    }
+
+    throw new BadRequestException(
+      'Provide either gap_items or actionable_level_up_blueprint to generate a roadmap.',
+    );
+  }
+
+  private toGapItemsFromBlueprint(
+    request: GenerateRoadmapRequestDto,
+  ): RoadmapGapItemDto[] {
+    const blueprint = request.actionable_level_up_blueprint;
+    if (!blueprint) {
+      return [];
+    }
+
+    const skillGaps = (blueprint.required_skills_to_learn ?? []).map((skill, index) => ({
+      skill_id: this.createBlueprintSkillId(skill.skill_name, index),
+      skill_name: skill.skill_name,
+      category: this.categoryFromAxis(skill.axis_category),
+      severity: this.severityFromPriority(skill.priority),
+      current_level: CurrentLevel.Missing,
+      target_level: TargetLevel.Intermediate,
+      reason: skill.why_needed ?? blueprint.summary,
+    }));
+
+    const featureGaps = (blueprint.practical_features_to_build ?? []).flatMap((feature, featureIndex) => {
+      const requirements = feature.technical_requirements?.length
+        ? feature.technical_requirements
+        : [feature.feature_title];
+
+      return requirements.map((requirement, requirementIndex) => ({
+        skill_id: this.createBlueprintSkillId(
+          requirement,
+          skillGaps.length + featureIndex + requirementIndex,
+        ),
+        skill_name: requirement,
+        category: GapCategory.AppliedProject,
+        severity: GapSeverity.High,
+        current_level: CurrentLevel.WeakEvidence,
+        target_level: TargetLevel.Portfolio,
+        reason:
+          feature.expected_learning_outcome ??
+          feature.project_context ??
+          'Build portfolio evidence through a practical project feature.',
+      }));
+    });
+
+    const englishRoadmap = blueprint.english_improvement_roadmap;
+    const englishGap = englishRoadmap
+      ? [
+          {
+            skill_id: 'technical_english_communication',
+            skill_name: 'Technical English Communication',
+            category: GapCategory.Portfolio,
+            severity: GapSeverity.Medium,
+            current_level: CurrentLevel.Partial,
+            target_level: TargetLevel.Intermediate,
+            reason:
+              englishRoadmap.recommended_action ??
+              englishRoadmap.target_english_benchmark ??
+              'Improve technical English for documentation and interviews.',
+          },
+        ]
+      : [];
+
+    return [...skillGaps, ...featureGaps, ...englishGap].slice(0, 8);
+  }
+
+  private scoreGaps(
+    request: GenerateRoadmapRequestDto,
+    gapItems: RoadmapGapItemDto[],
+  ): ScoredGap[] {
     const roleProfile = roleProfiles[request.target_role];
 
-    return request.gap_items
+    return gapItems
       .map((gap) => {
         const roleSkill = roleProfile.requiredSkills.find(
           (skill) => skill.skillId === gap.skill_id,
@@ -356,9 +436,17 @@ export class RoadmapService {
       practice: skillTemplate.practice,
       deliverable: skillTemplate.deliverable,
       teacher_resources: matchedResources.resourceIds,
-      external_courses: externalCourses.filter(
-        (course) => course.skill_id === gap.skill_id,
-      ),
+      external_courses: [
+        {
+          skill_id: gap.skill_id,
+          skill_name: gap.skill_name,
+          provider: 'YouTube Search Query',
+          search_query: [gap.skill_name, this.lessonTitleByWeek(week), 'tutorial'].join(' '),
+          search_url: '',
+          note: 'Internal query to be resolved',
+        },
+        ...externalCourses.filter((course) => course.skill_id === gap.skill_id),
+      ],
     };
   }
 
@@ -453,13 +541,14 @@ export class RoadmapService {
       };
     }
 
-    try {
-      const model = process.env.GEMINI_MODEL ?? 'gemini-3.6-flash';
-      let response: Response | undefined;
-      let attempt = 0;
-      const maxRetries = 3;
+    const candidateModels = this.getGeminiCandidateModels();
+    const errors: string[] = [];
 
-      while (attempt < maxRetries) {
+    for (const model of candidateModels) {
+      let response: Response | undefined;
+      const maxRetries = 2;
+
+      for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
         try {
           response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -484,70 +573,89 @@ export class RoadmapService {
           );
 
           if (response.ok) {
-            break; // Success
+            break;
           }
 
-          if (response.status === 503 || response.status === 429) {
-            attempt++;
-            if (attempt < maxRetries) {
-              await new Promise((res) => setTimeout(res, 2000 * attempt));
-              continue;
-            }
+          const retryable = response.status === 429 || response.status >= 500;
+          if (!retryable || attempt === maxRetries) {
+            const errorText = await response.text();
+            errors.push(`${model}: ${this.sanitizeGeminiError(response.status, errorText)}`);
+            break;
           }
-          break; // Break on other errors or max retries
+
+          await new Promise((res) => setTimeout(res, 1200 * attempt));
         } catch (fetchError) {
-          attempt++;
-          if (attempt >= maxRetries) throw fetchError;
-          await new Promise((res) => setTimeout(res, 2000 * attempt));
+          if (attempt === maxRetries) {
+            errors.push(
+              `${model}: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`,
+            );
+            break;
+          }
+
+          await new Promise((res) => setTimeout(res, 1200 * attempt));
         }
       }
 
-      if (!response || !response.ok) {
-        const errorText = response ? await response.text() : 'Network error or max retries exceeded.';
-        const statusCode = response ? response.status : 500;
-        return {
-          plan: null,
-          status: AiGenerationStatus.RequestFailed,
-          error: this.sanitizeGeminiError(statusCode, errorText),
-        };
+      if (!response?.ok) {
+        continue;
       }
 
-      const body = (await response.json()) as {
-        candidates?: Array<{
-          content?: { parts?: Array<{ text?: string }> };
-        }>;
-      };
-      const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!text) {
-        return {
-          plan: null,
-          status: AiGenerationStatus.EmptyResponse,
-          error: 'Gemini returned an empty response.',
+      try {
+        const body = (await response.json()) as {
+          candidates?: Array<{
+            content?: { parts?: Array<{ text?: string }> };
+          }>;
         };
+        const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+          errors.push(`${model}: Gemini returned an empty response.`);
+          continue;
+        }
+
+        const parsed = this.parseGeminiJson(text);
+        const plan = this.toFourWeekPlanFromGemini(parsed, fallbackPlan);
+
+        if (!this.isValidAiPlan(plan, improvementItems)) {
+          errors.push(`${model}: Gemini response did not pass roadmap validation.`);
+          continue;
+        }
+
+        return { plan, status: AiGenerationStatus.Generated, error: null };
+      } catch {
+        errors.push(`${model}: Gemini response was not valid JSON.`);
       }
-
-      const parsed = this.parseGeminiJson(text);
-      const plan = this.toFourWeekPlanFromGemini(parsed, fallbackPlan);
-
-      if (!this.isValidAiPlan(plan, improvementItems)) {
-        return {
-          plan: null,
-          status: AiGenerationStatus.ValidationFailed,
-          error: 'Gemini response did not pass roadmap validation.',
-        };
-      }
-
-      return { plan, status: AiGenerationStatus.Generated, error: null };
-    } catch {
-      return {
-        plan: null,
-        status: AiGenerationStatus.InvalidJson,
-        error: 'Gemini response was not valid JSON.',
-      };
     }
+
+    return {
+      plan: null,
+      status: errors.some((error) => error.includes('empty response'))
+        ? AiGenerationStatus.EmptyResponse
+        : errors.some((error) => error.includes('valid JSON') || error.includes('validation'))
+          ? AiGenerationStatus.ValidationFailed
+          : AiGenerationStatus.RequestFailed,
+      error: errors.join(' | ') || 'All Gemini model attempts failed.',
+    };
   }
 
+  private getGeminiCandidateModels(): string[] {
+    const configuredModel = process.env.GEMINI_MODEL;
+    const fallbackModels = [
+      'gemini-3.1-flash',
+      'gemini-3.5-pro',
+      'gemini-3.8-flash',
+      'gemini-3.6-flash',
+      'gemini-2.0-flash-exp',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+    ];
+
+    return Array.from(
+      new Set([configuredModel, ...fallbackModels].filter((model): model is string => Boolean(model))),
+    );
+  }
   private sanitizeGeminiError(status: number, errorText: string): string {
     try {
       const parsed = JSON.parse(errorText) as {
@@ -658,15 +766,15 @@ export class RoadmapService {
   ): Promise<FourWeekPlanDto[]> {
     const fetchPromises = plan.flatMap((week) =>
       week.lessons.map(async (lesson) => {
-        if (
-          !lesson.external_courses ||
-          lesson.external_courses.length === 0 ||
-          lesson.external_courses[0].provider !== 'YouTube Search Query'
-        ) {
+        const youtubeQuery = lesson.external_courses?.find(
+          (course) => course.provider === 'YouTube Search Query',
+        );
+
+        if (!youtubeQuery) {
           return;
         }
 
-        const query = lesson.external_courses[0].search_query;
+        const query = youtubeQuery.search_query;
         let videos = await this.cacheManager.get<any[]>(`yt_${query}`);
 
         if (!videos) {
@@ -826,6 +934,29 @@ export class RoadmapService {
     return (skillTaxonomy[skillId]?.prerequisites.length ?? 0) > 0;
   }
 
+  private categoryFromAxis(axis?: string): GapCategory {
+    const normalizedAxis = axis?.toLowerCase();
+    if (normalizedAxis === 'system') return GapCategory.Core;
+    if (normalizedAxis === 'people' || normalizedAxis === 'process') {
+      return GapCategory.Portfolio;
+    }
+    return GapCategory.Core;
+  }
+
+  private severityFromPriority(priority?: string): GapSeverity {
+    const normalizedPriority = priority?.toUpperCase();
+    if (normalizedPriority === 'LOW') return GapSeverity.Low;
+    if (normalizedPriority === 'MEDIUM') return GapSeverity.Medium;
+    return GapSeverity.High;
+  }
+
+  private createBlueprintSkillId(skillName: string, index: number): string {
+    const normalized = this.normalize(skillName)
+      .replace(/[^a-z0-9_]/g, '')
+      .slice(0, 48);
+    return normalized || 'blueprint_skill_' + (index + 1);
+  }
+
   private normalize(value: string): string {
     return value.trim().toLowerCase().replace(/[\s-]+/g, '_');
   }
@@ -842,3 +973,6 @@ export class RoadmapService {
     return `step_${skillId}_${type}_${index + 1}`;
   }
 }
+
+
+

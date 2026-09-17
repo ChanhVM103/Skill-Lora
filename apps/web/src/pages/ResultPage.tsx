@@ -23,6 +23,8 @@ export const ResultPage: React.FC = () => {
         return 'Data Analyst';
       case 'ai_engineer':
         return 'AI Engineer';
+      case 'frontend_reactjs':
+        return 'Frontend ReactJS Engineer';
       case 'backend_developer':
       default:
         return 'Backend Developer';
@@ -149,7 +151,7 @@ export const ResultPage: React.FC = () => {
           🎯 Danh Sách Hành Động Cần Ưu Tiên Thực Hiện
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {analysis.prioritized_actions.map((act) => (
+          {(analysis.prioritized_actions || []).map((act) => (
             <div
               key={act.id}
               style={{
@@ -218,3 +220,5 @@ export const ResultPage: React.FC = () => {
     </main>
   );
 };
+
+
