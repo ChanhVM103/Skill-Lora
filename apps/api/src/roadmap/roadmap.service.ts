@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import ytSearch from 'yt-search';
@@ -54,6 +55,8 @@ type MatchedResources = {
 
 @Injectable()
 export class RoadmapService {
+  private roadmaps: Map<string, RoadmapResponseDto> = new Map();
+
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async generateRoadmap(
@@ -79,7 +82,8 @@ export class RoadmapService {
       scoredGaps,
     );
 
-    const cacheKey = `ai_plan_${request.target_role}_${startingLevel}_${improvementItems.map((i) => i.skill_id).sort().join('_')}`;
+    const gapFingerprint = this.createGapFingerprint(effectiveGapItems);
+    const cacheKey = `ai_plan_${request.target_role}_${startingLevel}_${gapFingerprint}`;
     const cachedPlan = await this.cacheManager.get<FourWeekPlanDto[]>(cacheKey);
 
     const aiPrompt = this.buildGeminiPrompt(
@@ -116,7 +120,7 @@ export class RoadmapService {
       aiGeneration.plan ?? fallbackFourWeekPlan,
     );
 
-    return {
+    const response: RoadmapResponseDto = {
       roadmap_id: this.createRoadmapId(request.target_role),
       target_role: request.target_role,
       starting_level: startingLevel,
@@ -132,6 +136,17 @@ export class RoadmapService {
       ai_generation_error: aiGeneration.error,
       resource_gap_alerts: resourceGapAlerts,
     };
+
+    this.roadmaps.set(response.roadmap_id, response);
+    return response;
+  }
+
+  getRoadmapById(id: string): RoadmapResponseDto {
+    const roadmap = this.roadmaps.get(id);
+    if (!roadmap) {
+      throw new NotFoundException(`Roadmap with id ${id} not found`);
+    }
+    return roadmap;
   }
   private resolveGapItems(request: GenerateRoadmapRequestDto): RoadmapGapItemDto[] {
     if (request.gap_items?.length) {
@@ -157,7 +172,7 @@ export class RoadmapService {
     }
 
     const skillGaps = (blueprint.required_skills_to_learn ?? []).map((skill, index) => ({
-      skill_id: this.createBlueprintSkillId(skill.skill_name, index),
+      skill_id: this.createBlueprintSkillId(skill.skill_name, index, request.target_role),
       skill_name: skill.skill_name,
       category: this.categoryFromAxis(skill.axis_category),
       severity: this.severityFromPriority(skill.priority),
@@ -175,6 +190,7 @@ export class RoadmapService {
         skill_id: this.createBlueprintSkillId(
           requirement,
           skillGaps.length + featureIndex + requirementIndex,
+          request.target_role,
         ),
         skill_name: requirement,
         category: GapCategory.AppliedProject,
@@ -950,11 +966,85 @@ export class RoadmapService {
     return GapSeverity.High;
   }
 
-  private createBlueprintSkillId(skillName: string, index: number): string {
+  private createBlueprintSkillId(
+    skillName: string,
+    index: number,
+    targetRole?: string,
+  ): string {
+    const canonicalSkillId = this.matchCanonicalSkillId(skillName, targetRole);
+    if (canonicalSkillId) {
+      return canonicalSkillId;
+    }
+
     const normalized = this.normalize(skillName)
       .replace(/[^a-z0-9_]/g, '')
       .slice(0, 48);
     return normalized || 'blueprint_skill_' + (index + 1);
+  }
+
+  private matchCanonicalSkillId(skillName: string, targetRole?: string): string | null {
+    const normalizedName = skillName.toLowerCase();
+
+    if (targetRole === 'frontend_reactjs') {
+      if (normalizedName.includes('fiber') || normalizedName.includes('concurrent')) {
+        return 'react_fiber_concurrent';
+      }
+      if (
+        normalizedName.includes('web vitals') ||
+        normalizedName.includes('bundle') ||
+        normalizedName.includes('lcp') ||
+        normalizedName.includes('inp') ||
+        normalizedName.includes('cls')
+      ) {
+        return 'web_vitals_bundle_splitting';
+      }
+      if (
+        normalizedName.includes('ci/cd') ||
+        normalizedName.includes('playwright') ||
+        normalizedName.includes('visual regression') ||
+        normalizedName.includes('e2e')
+      ) {
+        return 'frontend_testing_cicd';
+      }
+      if (
+        normalizedName.includes('micro-frontend') ||
+        normalizedName.includes('micro frontend') ||
+        normalizedName.includes('module federation')
+      ) {
+        return 'micro_frontend_architecture';
+      }
+    }
+
+    if (normalizedName.includes('english')) {
+      return 'technical_english_communication';
+    }
+    if (targetRole === 'backend_developer') {
+      if (normalizedName.includes('rest') || normalizedName.includes('api')) {
+        return 'rest_api';
+      }
+      if (
+        normalizedName.includes('database') ||
+        normalizedName.includes('sql') ||
+        normalizedName.includes('index')
+      ) {
+        return 'sql_database';
+      }
+      if (normalizedName.includes('auth')) {
+        return 'authentication';
+      }
+      if (normalizedName.includes('test')) {
+        return 'testing';
+      }
+    }
+
+    return null;
+  }
+
+  private createGapFingerprint(gapItems: RoadmapGapItemDto[]): string {
+    return createHash('sha1')
+      .update(JSON.stringify(gapItems))
+      .digest('hex')
+      .slice(0, 16);
   }
 
   private normalize(value: string): string {
@@ -973,6 +1063,7 @@ export class RoadmapService {
     return `step_${skillId}_${type}_${index + 1}`;
   }
 }
+
 
 
 

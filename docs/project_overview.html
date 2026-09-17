@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skillora Project Overview</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --text: #25313f;
+            --muted: #64748b;
+            --border: #e5e7eb;
+            --blue: #2563eb;
+            --blue-soft: #eff6ff;
+            --orange: #f97316;
+            --orange-soft: #fff7ed;
+            --code: #eef2ff;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: var(--bg);
+        }
+        h1, h2, h3 { color: #1f2d3d; }
+        h1 {
+            margin: 12px 0 8px;
+            border-bottom: 2px solid var(--blue);
+            padding-bottom: 12px;
+            text-align: center;
+        }
+        h2 { margin-top: 0; }
+        h3 { margin-bottom: 8px; }
+        .container {
+            background-color: var(--card);
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 32px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            background: #fff;
+            font-size: 14px;
+        }
+        .language-toggle {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+            background: #fff;
+            flex: 0 0 auto;
+        }
+        .language-toggle button {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .language-toggle button.active {
+            background: var(--blue);
+            color: #fff;
+        }
+        .section { margin-bottom: 34px; }
+        ul, ol { padding-left: 22px; }
+        li { margin-bottom: 8px; }
+        code {
+            background-color: var(--code);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #be123c;
+        }
+        pre {
+            background-color: #111827;
+            color: #f9fafb;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .highlight {
+            background-color: var(--blue-soft);
+            border-left: 4px solid var(--blue);
+            padding: 12px 14px;
+            margin: 16px 0;
+        }
+        .warning {
+            background-color: var(--orange-soft);
+            border-left: 4px solid var(--orange);
+            padding: 12px 14px;
+            margin: 16px 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            background: #ffffff;
+        }
+        .card h3 { margin-top: 0; }
+        .flow {
+            display: grid;
+            gap: 10px;
+        }
+        .flow-step {
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--blue);
+            border-radius: 8px;
+            padding: 12px 14px;
+            background: #fff;
+        }
+        .flow-step strong { display: block; margin-bottom: 4px; }
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .container { padding: 20px; }
+            .topbar { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <span class="badge" data-i18n="badge">Track 1 - Future Skills Readiness</span>
+            <div class="language-toggle" aria-label="Language selector">
+                <button type="button" class="active" data-lang-button="vi">Tiếng Việt</button>
+                <button type="button" data-lang-button="en">English</button>
+            </div>
+        </div>
+
+        <h1 data-i18n="title">Tổng Quan Dự Án Skillora</h1>
+
+        <div class="section">
+            <h2 data-i18n="s1Title">1. Skillora Là Gì?</h2>
+            <p data-i18n="s1P1"><strong>Skillora</strong> là sản phẩm MVP cho Hackathon Track 1 - Future Skills Readiness. Hệ thống đóng vai trò như một AI Skill Gap Coach giúp sinh viên biến CV hiện tại thành báo cáo năng lực nghề nghiệp và lộ trình học tập có thể hành động ngay.</p>
+            <p data-i18n="s1P2">Thay vì chỉ quét CV và đưa ra nhận xét chung chung, Skillora kiểm tra bằng chứng trong CV, đối chiếu với vai trò mục tiêu, xác minh thêm qua câu hỏi phỏng vấn, sau đó sinh ra <code>actionable_level_up_blueprint</code> và lộ trình học 4 tuần kèm video/tài nguyên gợi ý.</p>
+            <div class="highlight" data-i18n="s1Highlight"><strong>Thông điệp sản phẩm:</strong> Skillora giúp sinh viên biết mình đang ở đâu, thiếu gì để sẵn sàng cho nghề mục tiêu, và cần học/xây dựng gì trong 4 tuần tiếp theo.</div>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s2Title">2. Pain Point Của Track 1</h2>
+            <div class="grid">
+                <div class="card"><h3 data-i18n="pain1Title">Sinh viên không biết mình thiếu gì</h3><p data-i18n="pain1Body">CV thường liệt kê kỹ năng rời rạc, nhưng sinh viên khó biết kỹ năng nào thật sự có bằng chứng và kỹ năng nào còn thiếu so với vị trí mong muốn.</p></div>
+                <div class="card"><h3 data-i18n="pain2Title">Lộ trình học quá chung chung</h3><p data-i18n="pain2Body">Nhiều lời khuyên dừng ở mức "học React", "học API", "học SQL" mà không chỉ rõ thứ tự ưu tiên, sản phẩm cần xây, hoặc đầu ra cần chứng minh.</p></div>
+                <div class="card"><h3 data-i18n="pain3Title">Khoảng cách giữa CV và phỏng vấn</h3><p data-i18n="pain3Body">Sinh viên có thể ghi công nghệ trong CV nhưng chưa giải thích được trade-off, lỗi thực tế, tối ưu hiệu năng, testing hay quy trình làm việc.</p></div>
+                <div class="card"><h3 data-i18n="pain4Title">Giảng viên khó cá nhân hóa hỗ trợ</h3><p data-i18n="pain4Body">Với nhiều sinh viên, giáo viên/mentor khó đọc từng CV, xác định skill gap lặp lại và đề xuất tài nguyên học phù hợp một cách nhất quán.</p></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s3Title">3. Cách Scan CV, Phân Tích Và Kiểm Tra</h2>
+            <div class="flow">
+                <div class="flow-step"><strong data-i18n="scan1Title">Bước 1 - Upload và ingestion</strong><span data-i18n="scan1Body">Sinh viên gửi <code>cv_file</code> và <code>target_role</code>. Backend kiểm tra file, đọc buffer, trích xuất raw text từ CV, lưu file nếu có Cloudinary và lưu phiên phân tích vào database.</span></div>
+                <div class="flow-step"><strong data-i18n="scan2Title">Bước 2 - Parse baseline</strong><span data-i18n="scan2Body">Hệ thống phân tích raw text để nhận diện dự án, kỹ năng, kinh nghiệm, chứng chỉ, tín hiệu tiếng Anh và ước lượng giả thuyết level ban đầu. Đây là nhận định sơ bộ, chưa phải kết luận cuối.</span></div>
+                <div class="flow-step"><strong data-i18n="scan3Title">Bước 3 - Sinh câu hỏi xác minh</strong><span data-i18n="scan3Body">Dựa trên role và baseline, backend sinh câu hỏi theo 4 trục Technology, System, People, Process. Mục tiêu là kiểm tra ứng viên có thật sự hiểu và làm được những gì CV đang thể hiện hay không.</span></div>
+                <div class="flow-step"><strong data-i18n="scan4Title">Bước 4 - Chấm rubric bằng câu trả lời</strong><span data-i18n="scan4Body">Khi sinh viên nộp câu trả lời, hệ thống ghép câu hỏi với câu trả lời, đối chiếu với CV và Engineering Ladders rubric để xác minh level hiện tại, điểm từng trục và evidence ledger.</span></div>
+                <div class="flow-step"><strong data-i18n="scan5Title">Bước 5 - Sinh actionable blueprint</strong><span data-i18n="scan5Body">Từ kết quả xác minh, hệ thống sinh <code>actionable_level_up_blueprint</code>: kỹ năng cần học, lý do cần học, mức ưu tiên, feature/project thực hành cần xây và kế hoạch cải thiện tiếng Anh kỹ thuật.</span></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s4Title">4. Cách Sinh Lộ Trình Từ Blueprint</h2>
+            <ol>
+                <li data-i18n="road1">Roadmap API nhận <code>target_role</code>, <code>starting_level</code> và <code>actionable_level_up_blueprint</code>.</li>
+                <li data-i18n="road2">Backend convert <code>required_skills_to_learn</code> thành skill gaps, convert <code>practical_features_to_build</code> thành applied project gaps, và convert English roadmap thành communication gap.</li>
+                <li data-i18n="road3">Các skill quen thuộc được map về canonical skill ID theo role, ví dụ React Fiber -> <code>react_fiber_concurrent</code>, Web Vitals -> <code>web_vitals_bundle_splitting</code>.</li>
+                <li data-i18n="road4">Hệ thống tính điểm ưu tiên bằng severity, current level, role importance và prerequisite boost; sau đó phân bổ skill vào 4 tuần.</li>
+                <li data-i18n="road5">AI model được yêu cầu chỉ dùng các skill đã cung cấp, sinh đúng 4 tuần, mỗi tuần 1 lesson chính và có YouTube search query.</li>
+                <li data-i18n="road6">Nếu model lỗi hoặc JSON không hợp lệ, backend thử model fallback; nếu vẫn lỗi thì dùng fallback roadmap deterministic.</li>
+                <li data-i18n="road7">Cuối cùng, hệ thống resolve YouTube query thành video thật và cache kết quả để lần sau nhanh hơn.</li>
+            </ol>
+            <pre><code>POST /roadmaps/generate
+{
+  "target_role": "frontend_reactjs",
+  "starting_level": "beginner",
+  "actionable_level_up_blueprint": {
+    "role_context": "frontend_reactjs",
+    "required_skills_to_learn": [...],
+    "practical_features_to_build": [...],
+    "english_improvement_roadmap": {...}
+  }
+}</code></pre>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s5Title">5. Luồng Backend Hiện Tại</h2>
+            <pre><code data-i18n="backendFlow">POST /analyses/baseline
+CV upload + target role
+-> Extract raw CV text
+-> Parse baseline profile
+-> Generate interview questions
+-> Save session
+
+POST /analyses/:id/submit-answers
+Candidate answers
+-> Verify CV claims with rubric
+-> Score Technology/System/People/Process axes
+-> Produce actionable_level_up_blueprint
+-> Save final evaluation
+
+GET /cv/history/:id or GET /analyses/:id
+-> Retrieve target_role, scores, evidence ledger, actionable_level_up_blueprint
+
+POST /roadmaps/generate
+Target role + actionable_level_up_blueprint
+-> Convert blueprint into gap items
+-> Score/prioritize gaps
+-> Generate exactly 4 weeks
+-> Attach YouTube video suggestions</code></pre>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s6Title">6. Nguyên Tắc Xử Lý Và An Toàn</h2>
+            <div class="warning" data-i18n="s6Warning"><strong>Deterministic-first:</strong> LLM có thể hỗ trợ parse/sinh nội dung có cấu trúc, nhưng scoring, ưu tiên skill gap, validation roadmap và ràng buộc 4 tuần phải do backend kiểm soát.</div>
+            <ul>
+                <li data-i18n="safe1">Không để roadmap tự do bịa skill ngoài blueprint/gap items.</li>
+                <li data-i18n="safe2">Không coi baseline scan CV là kết luận cuối; cần xác minh bằng câu trả lời phỏng vấn.</li>
+                <li data-i18n="safe3">Frontend nên render roadmap chính từ <code>four_week_plan</code>, vì đây là format đã chuẩn hóa đúng 4 tuần.</li>
+                <li data-i18n="safe4">Cache roadmap theo fingerprint của gap/blueprint để tránh dùng nhầm roadmap cũ khi nội dung phân tích thay đổi.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s7Title">7. Output Chính Cho Frontend</h2>
+            <ul>
+                <li data-i18n="out1"><code>actionable_level_up_blueprint</code>: nguồn dữ liệu chính để sinh roadmap cá nhân hóa.</li>
+                <li data-i18n="out2"><code>improvement_items</code>: danh sách skill gap đã được ưu tiên hóa.</li>
+                <li data-i18n="out3"><code>four_week_plan</code>: dữ liệu chính frontend nên dùng để hiển thị lộ trình 4 tuần.</li>
+                <li data-i18n="out4"><code>external_courses</code>: danh sách video YouTube đã resolve cho từng lesson.</li>
+                <li data-i18n="out5"><code>resource_gap_alerts</code>: cảnh báo cho giáo viên khi thiếu tài nguyên nội bộ.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 data-i18n="s8Title">8. Cách Chạy Dự Án</h2>
+            <pre><code>npm install
+npm run dev:api
+npm run dev:web</code></pre>
+            <p data-i18n="swagger">Swagger UI backend: <code>http://localhost:3000/docs</code></p>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            vi: {
+                badge: 'Track 1 - Future Skills Readiness',
+                title: 'Tổng Quan Dự Án Skillora',
+                s1Title: '1. Skillora Là Gì?',
+                s1P1: '<strong>Skillora</strong> là sản phẩm MVP cho Hackathon Track 1 - Future Skills Readiness. Hệ thống đóng vai trò như một AI Skill Gap Coach giúp sinh viên biến CV hiện tại thành báo cáo năng lực nghề nghiệp và lộ trình học tập có thể hành động ngay.',
+                s1P2: 'Thay vì chỉ quét CV và đưa ra nhận xét chung chung, Skillora kiểm tra bằng chứng trong CV, đối chiếu với vai trò mục tiêu, xác minh thêm qua câu hỏi phỏng vấn, sau đó sinh ra <code>actionable_level_up_blueprint</code> và lộ trình học 4 tuần kèm video/tài nguyên gợi ý.',
+                s1Highlight: '<strong>Thông điệp sản phẩm:</strong> Skillora giúp sinh viên biết mình đang ở đâu, thiếu gì để sẵn sàng cho nghề mục tiêu, và cần học/xây dựng gì trong 4 tuần tiếp theo.',
+                s2Title: '2. Pain Point Của Track 1',
+                pain1Title: 'Sinh viên không biết mình thiếu gì',
+                pain1Body: 'CV thường liệt kê kỹ năng rời rạc, nhưng sinh viên khó biết kỹ năng nào thật sự có bằng chứng và kỹ năng nào còn thiếu so với vị trí mong muốn.',
+                pain2Title: 'Lộ trình học quá chung chung',
+                pain2Body: 'Nhiều lời khuyên dừng ở mức "học React", "học API", "học SQL" mà không chỉ rõ thứ tự ưu tiên, sản phẩm cần xây, hoặc đầu ra cần chứng minh.',
+                pain3Title: 'Khoảng cách giữa CV và phỏng vấn',
+                pain3Body: 'Sinh viên có thể ghi công nghệ trong CV nhưng chưa giải thích được trade-off, lỗi thực tế, tối ưu hiệu năng, testing hay quy trình làm việc.',
+                pain4Title: 'Giảng viên khó cá nhân hóa hỗ trợ',
+                pain4Body: 'Với nhiều sinh viên, giáo viên/mentor khó đọc từng CV, xác định skill gap lặp lại và đề xuất tài nguyên học phù hợp một cách nhất quán.',
+                s3Title: '3. Cách Scan CV, Phân Tích Và Kiểm Tra',
+                scan1Title: 'Bước 1 - Upload và ingestion',
+                scan1Body: 'Sinh viên gửi <code>cv_file</code> và <code>target_role</code>. Backend kiểm tra file, đọc buffer, trích xuất raw text từ CV, lưu file nếu có Cloudinary và lưu phiên phân tích vào database.',
+                scan2Title: 'Bước 2 - Parse baseline',
+                scan2Body: 'Hệ thống phân tích raw text để nhận diện dự án, kỹ năng, kinh nghiệm, chứng chỉ, tín hiệu tiếng Anh và ước lượng giả thuyết level ban đầu. Đây là nhận định sơ bộ, chưa phải kết luận cuối.',
+                scan3Title: 'Bước 3 - Sinh câu hỏi xác minh',
+                scan3Body: 'Dựa trên role và baseline, backend sinh câu hỏi theo 4 trục Technology, System, People, Process. Mục tiêu là kiểm tra ứng viên có thật sự hiểu và làm được những gì CV đang thể hiện hay không.',
+                scan4Title: 'Bước 4 - Chấm rubric bằng câu trả lời',
+                scan4Body: 'Khi sinh viên nộp câu trả lời, hệ thống ghép câu hỏi với câu trả lời, đối chiếu với CV và Engineering Ladders rubric để xác minh level hiện tại, điểm từng trục và evidence ledger.',
+                scan5Title: 'Bước 5 - Sinh actionable blueprint',
+                scan5Body: 'Từ kết quả xác minh, hệ thống sinh <code>actionable_level_up_blueprint</code>: kỹ năng cần học, lý do cần học, mức ưu tiên, feature/project thực hành cần xây và kế hoạch cải thiện tiếng Anh kỹ thuật.',
+                s4Title: '4. Cách Sinh Lộ Trình Từ Blueprint',
+                road1: 'Roadmap API nhận <code>target_role</code>, <code>starting_level</code> và <code>actionable_level_up_blueprint</code>.',
+                road2: 'Backend convert <code>required_skills_to_learn</code> thành skill gaps, convert <code>practical_features_to_build</code> thành applied project gaps, và convert English roadmap thành communication gap.',
+                road3: 'Các skill quen thuộc được map về canonical skill ID theo role, ví dụ React Fiber -> <code>react_fiber_concurrent</code>, Web Vitals -> <code>web_vitals_bundle_splitting</code>.',
+                road4: 'Hệ thống tính điểm ưu tiên bằng severity, current level, role importance và prerequisite boost; sau đó phân bổ skill vào 4 tuần.',
+                road5: 'AI model được yêu cầu chỉ dùng các skill đã cung cấp, sinh đúng 4 tuần, mỗi tuần 1 lesson chính và có YouTube search query.',
+                road6: 'Nếu model lỗi hoặc JSON không hợp lệ, backend thử model fallback; nếu vẫn lỗi thì dùng fallback roadmap deterministic.',
+                road7: 'Cuối cùng, hệ thống resolve YouTube query thành video thật và cache kết quả để lần sau nhanh hơn.',
+                s5Title: '5. Luồng Backend Hiện Tại',
+                backendFlow: 'POST /analyses/baseline\nCV upload + target role\n-> Extract raw CV text\n-> Parse baseline profile\n-> Generate interview questions\n-> Save session\n\nPOST /analyses/:id/submit-answers\nCandidate answers\n-> Verify CV claims with rubric\n-> Score Technology/System/People/Process axes\n-> Produce actionable_level_up_blueprint\n-> Save final evaluation\n\nGET /cv/history/:id or GET /analyses/:id\n-> Retrieve target_role, scores, evidence ledger, actionable_level_up_blueprint\n\nPOST /roadmaps/generate\nTarget role + actionable_level_up_blueprint\n-> Convert blueprint into gap items\n-> Score/prioritize gaps\n-> Generate exactly 4 weeks\n-> Attach YouTube video suggestions',
+                s6Title: '6. Nguyên Tắc Xử Lý Và An Toàn',
+                s6Warning: '<strong>Deterministic-first:</strong> LLM có thể hỗ trợ parse/sinh nội dung có cấu trúc, nhưng scoring, ưu tiên skill gap, validation roadmap và ràng buộc 4 tuần phải do backend kiểm soát.',
+                safe1: 'Không để roadmap tự do bịa skill ngoài blueprint/gap items.',
+                safe2: 'Không coi baseline scan CV là kết luận cuối; cần xác minh bằng câu trả lời phỏng vấn.',
+                safe3: 'Frontend nên render roadmap chính từ <code>four_week_plan</code>, vì đây là format đã chuẩn hóa đúng 4 tuần.',
+                safe4: 'Cache roadmap theo fingerprint của gap/blueprint để tránh dùng nhầm roadmap cũ khi nội dung phân tích thay đổi.',
+                s7Title: '7. Output Chính Cho Frontend',
+                out1: '<code>actionable_level_up_blueprint</code>: nguồn dữ liệu chính để sinh roadmap cá nhân hóa.',
+                out2: '<code>improvement_items</code>: danh sách skill gap đã được ưu tiên hóa.',
+                out3: '<code>four_week_plan</code>: dữ liệu chính frontend nên dùng để hiển thị lộ trình 4 tuần.',
+                out4: '<code>external_courses</code>: danh sách video YouTube đã resolve cho từng lesson.',
+                out5: '<code>resource_gap_alerts</code>: cảnh báo cho giáo viên khi thiếu tài nguyên nội bộ.',
+                s8Title: '8. Cách Chạy Dự Án',
+                swagger: 'Swagger UI backend: <code>http://localhost:3000/docs</code>'
+            },
+            en: {
+                badge: 'Track 1 - Future Skills Readiness',
+                title: 'Skillora Project Overview',
+                s1Title: '1. What Is Skillora?',
+                s1P1: '<strong>Skillora</strong> is an MVP for Hackathon Track 1 - Future Skills Readiness. It works as an AI Skill Gap Coach that turns a student CV into a career-readiness report and an actionable learning plan.',
+                s1P2: 'Instead of only scanning a CV and giving generic feedback, Skillora checks CV evidence, compares it with a target role, verifies claims through interview questions, then generates an <code>actionable_level_up_blueprint</code> and a 4-week roadmap with suggested videos/resources.',
+                s1Highlight: '<strong>Product message:</strong> Skillora helps students understand where they are, what is missing for their target career, and what they should learn or build in the next 4 weeks.',
+                s2Title: '2. Track 1 Pain Points',
+                pain1Title: 'Students do not know what they are missing',
+                pain1Body: 'CVs often list scattered skills, but students struggle to know which skills are backed by evidence and which skills are missing for the target role.',
+                pain2Title: 'Learning paths are too generic',
+                pain2Body: 'Many recommendations stop at "learn React", "learn APIs", or "learn SQL" without clear priority, proof-of-work, or expected deliverables.',
+                pain3Title: 'CV claims do not always match interview readiness',
+                pain3Body: 'Students may list technologies in a CV but may not be able to explain trade-offs, real bugs, performance work, testing, or team process.',
+                pain4Title: 'Teachers need scalable personalization',
+                pain4Body: 'Teachers and mentors need a consistent way to review many CVs, detect repeated skill gaps, and recommend relevant learning resources.',
+                s3Title: '3. How CV Scanning, Analysis, And Verification Work',
+                scan1Title: 'Step 1 - Upload and ingestion',
+                scan1Body: 'The student submits <code>cv_file</code> and <code>target_role</code>. The backend validates the file, reads the buffer, extracts raw CV text, optionally stores the file in Cloudinary, and saves the analysis session.',
+                scan2Title: 'Step 2 - Baseline parsing',
+                scan2Body: 'The system analyzes raw text to identify projects, skills, experience, certificates, English signals, and an initial level hypothesis. This is only a preliminary hypothesis, not the final verdict.',
+                scan3Title: 'Step 3 - Verification question generation',
+                scan3Body: 'Based on the target role and baseline, the backend generates questions across Technology, System, People, and Process. The goal is to verify whether the student can actually explain what the CV claims.',
+                scan4Title: 'Step 4 - Rubric evaluation from answers',
+                scan4Body: 'After the student submits answers, the system pairs questions with answers, compares them with the CV and Engineering Ladders rubric, then verifies current level, axis scores, and evidence ledger.',
+                scan5Title: 'Step 5 - Actionable blueprint generation',
+                scan5Body: 'From the verified result, the system produces an <code>actionable_level_up_blueprint</code>: skills to learn, reasons, priorities, practical features/projects to build, and a technical English improvement plan.',
+                s4Title: '4. How The Roadmap Is Generated From The Blueprint',
+                road1: 'The Roadmap API receives <code>target_role</code>, <code>starting_level</code>, and <code>actionable_level_up_blueprint</code>.',
+                road2: 'The backend converts <code>required_skills_to_learn</code> into skill gaps, <code>practical_features_to_build</code> into applied project gaps, and the English roadmap into a communication gap.',
+                road3: 'Known skills are mapped to canonical role skill IDs, for example React Fiber -> <code>react_fiber_concurrent</code>, Web Vitals -> <code>web_vitals_bundle_splitting</code>.',
+                road4: 'The system calculates priority using severity, current level, role importance, and prerequisite boost, then assigns skills into 4 weeks.',
+                road5: 'The AI model is constrained to use only the provided skills, generate exactly 4 weeks, create one main lesson per week, and provide a YouTube search query.',
+                road6: 'If the model fails or returns invalid JSON, the backend tries fallback models. If all fail, it uses the deterministic fallback roadmap.',
+                road7: 'Finally, the system resolves YouTube queries into real videos and caches the result for faster future responses.',
+                s5Title: '5. Current Backend Flow',
+                backendFlow: 'POST /analyses/baseline\nCV upload + target role\n-> Extract raw CV text\n-> Parse baseline profile\n-> Generate interview questions\n-> Save session\n\nPOST /analyses/:id/submit-answers\nCandidate answers\n-> Verify CV claims with rubric\n-> Score Technology/System/People/Process axes\n-> Produce actionable_level_up_blueprint\n-> Save final evaluation\n\nGET /cv/history/:id or GET /analyses/:id\n-> Retrieve target_role, scores, evidence ledger, actionable_level_up_blueprint\n\nPOST /roadmaps/generate\nTarget role + actionable_level_up_blueprint\n-> Convert blueprint into gap items\n-> Score/prioritize gaps\n-> Generate exactly 4 weeks\n-> Attach YouTube video suggestions',
+                s6Title: '6. Processing And Safety Principles',
+                s6Warning: '<strong>Deterministic-first:</strong> LLMs may help parse or generate structured content, but scoring, skill-gap priority, roadmap validation, and the 4-week constraint must be controlled by backend logic.',
+                safe1: 'Do not allow the roadmap to freely invent skills outside the blueprint/gap items.',
+                safe2: 'Do not treat the initial CV scan as the final conclusion; it must be verified through interview answers.',
+                safe3: 'The frontend should render the main roadmap from <code>four_week_plan</code>, because this is the normalized 4-week format.',
+                safe4: 'Cache roadmaps by gap/blueprint fingerprint to avoid reusing stale plans when the analysis content changes.',
+                s7Title: '7. Main Frontend Outputs',
+                out1: '<code>actionable_level_up_blueprint</code>: the main source for personalized roadmap generation.',
+                out2: '<code>improvement_items</code>: prioritized skill gaps.',
+                out3: '<code>four_week_plan</code>: the main structure for displaying the 4-week roadmap.',
+                out4: '<code>external_courses</code>: resolved YouTube videos for each lesson.',
+                out5: '<code>resource_gap_alerts</code>: alerts for teachers when internal resources are missing.',
+                s8Title: '8. How To Run The Project',
+                swagger: 'Backend Swagger UI: <code>http://localhost:3000/docs</code>'
+            }
+        };
+
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach((element) => {
+                const key = element.getAttribute('data-i18n');
+                const value = translations[lang][key];
+                if (value !== undefined) {
+                    element.innerHTML = value;
+                }
+            });
+            document.querySelectorAll('[data-lang-button]').forEach((button) => {
+                button.classList.toggle('active', button.getAttribute('data-lang-button') === lang);
+            });
+            document.title = translations[lang].title;
+            localStorage.setItem('skillora_overview_lang', lang);
+        }
+
+        document.querySelectorAll('[data-lang-button]').forEach((button) => {
+            button.addEventListener('click', () => setLanguage(button.getAttribute('data-lang-button')));
+        });
+
+        setLanguage(localStorage.getItem('skillora_overview_lang') || 'vi');
+    </script>
+</body>
+</html>
