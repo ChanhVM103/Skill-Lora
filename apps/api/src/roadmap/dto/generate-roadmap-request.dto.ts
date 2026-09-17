@@ -12,6 +12,7 @@ import { Type } from 'class-transformer';
 export enum TargetRole {
   DataAnalyst = 'data_analyst',
   BackendDeveloper = 'backend_developer',
+  FrontendReactjs = 'frontend_reactjs',
   AiEngineer = 'ai_engineer',
   DigitalMarketingSpecialist = 'digital_marketing_specialist',
 }
@@ -129,6 +130,104 @@ export class RoadmapResourceDto {
   url?: string;
 }
 
+export class BlueprintSkillDto {
+  @ApiProperty({ example: 'React Performance Optimization & Memoization' })
+  @IsString()
+  skill_name: string;
+
+  @ApiPropertyOptional({ example: 'technology' })
+  @IsOptional()
+  @IsString()
+  axis_category?: string;
+
+  @ApiPropertyOptional({ example: 'Master runtime troubleshooting and performance tuning.' })
+  @IsOptional()
+  @IsString()
+  why_needed?: string;
+
+  @ApiPropertyOptional({ example: 'HIGH' })
+  @IsOptional()
+  @IsString()
+  priority?: string;
+}
+
+export class BlueprintFeatureDto {
+  @ApiProperty({ example: 'Build a Production RESTful API with Redis Caching' })
+  @IsString()
+  feature_title: string;
+
+  @ApiPropertyOptional({ example: 'Practice project tailored for Backend Developer' })
+  @IsOptional()
+  @IsString()
+  project_context?: string;
+
+  @ApiPropertyOptional({ type: [String], example: ['NestJS', 'Redis', 'Docker Compose'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  technical_requirements?: string[];
+
+  @ApiPropertyOptional({ example: 'Demonstrate hands-on competency for the next target level.' })
+  @IsOptional()
+  @IsString()
+  expected_learning_outcome?: string;
+}
+
+export class BlueprintEnglishRoadmapDto {
+  @ApiPropertyOptional({ example: 'Basic Technical Reading' })
+  @IsOptional()
+  @IsString()
+  current_perceived_english?: string;
+
+  @ApiPropertyOptional({ example: 'TOEIC 750+ / Read official docs fluently' })
+  @IsOptional()
+  @IsString()
+  target_english_benchmark?: string;
+
+  @ApiPropertyOptional({ type: [String], example: ['Read official framework documentation directly'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  key_focus_areas?: string[];
+
+  @ApiPropertyOptional({ example: 'Spend 30 minutes daily reading technical documentation.' })
+  @IsOptional()
+  @IsString()
+  recommended_action?: string;
+}
+
+export class ActionableLevelUpBlueprintDto {
+  @ApiPropertyOptional({ example: 'backend_developer' })
+  @IsOptional()
+  @IsString()
+  role_context?: string;
+
+  @ApiPropertyOptional({ example: 'Actionable roadmap to advance from current level to target level.' })
+  @IsOptional()
+  @IsString()
+  summary?: string;
+
+  @ApiPropertyOptional({ type: [BlueprintSkillDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BlueprintSkillDto)
+  required_skills_to_learn?: BlueprintSkillDto[];
+
+  @ApiPropertyOptional({ type: [BlueprintFeatureDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BlueprintFeatureDto)
+  practical_features_to_build?: BlueprintFeatureDto[];
+
+  @ApiPropertyOptional({ type: BlueprintEnglishRoadmapDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BlueprintEnglishRoadmapDto)
+  english_improvement_roadmap?: BlueprintEnglishRoadmapDto;
+}
+
 export class GenerateRoadmapRequestDto {
   @ApiProperty({ enum: TargetRole, example: TargetRole.BackendDeveloper })
   @IsEnum(TargetRole)
@@ -143,11 +242,18 @@ export class GenerateRoadmapRequestDto {
   @IsEnum(StartingLevel)
   starting_level?: StartingLevel;
 
-  @ApiProperty({ type: [RoadmapGapItemDto] })
+  @ApiPropertyOptional({ type: [RoadmapGapItemDto], default: [] })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RoadmapGapItemDto)
-  gap_items: RoadmapGapItemDto[];
+  gap_items?: RoadmapGapItemDto[];
+
+  @ApiPropertyOptional({ type: ActionableLevelUpBlueprintDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ActionableLevelUpBlueprintDto)
+  actionable_level_up_blueprint?: ActionableLevelUpBlueprintDto;
 
   @ApiPropertyOptional({ type: [RoadmapResourceDto], default: [] })
   @IsOptional()
@@ -156,3 +262,6 @@ export class GenerateRoadmapRequestDto {
   @Type(() => RoadmapResourceDto)
   resources?: RoadmapResourceDto[];
 }
+
+
+

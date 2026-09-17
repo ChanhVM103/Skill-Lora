@@ -1,4 +1,5 @@
 import type { RoadmapGapItem, TargetRole } from './roadmap.types';
+import type { ActionableLevelUpBlueprint, ActionableLevelUpBlueprintItem } from './index';
 
 
 export interface ParsedCv {
@@ -68,5 +69,10 @@ export interface AnalysisResponse {
   existing_skills: string[];
   missing_skills: string[];
   gap_items: RoadmapGapItem[];
-  prioritized_actions: PrioritizedAction[];
+  prioritized_actions?: PrioritizedAction[];
+  actionable_level_up_blueprint?: ActionableLevelUpBlueprint | ActionableLevelUpBlueprintItem[] | null;
+  part_2_cv_content_and_level_assessment?: {
+    actionable_level_up_blueprint?: ActionableLevelUpBlueprint | ActionableLevelUpBlueprintItem[] | null;
+  };
 }
+

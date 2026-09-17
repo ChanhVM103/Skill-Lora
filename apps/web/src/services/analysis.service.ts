@@ -42,8 +42,13 @@ export const analysisService = {
    * Calls GET /api/analyses/:id to retrieve previously generated analysis
    */
   async getAnalysisById(id: string): Promise<AnalysisResponse> {
-    const response = await apiClient.get<AnalysisResponse>(`/analyses/${id}`);
-    return response.data;
+    try {
+      const response = await apiClient.get<AnalysisResponse>(`/analyses/${id}`);
+      return response.data;
+    } catch {
+      const response = await apiClient.get<AnalysisResponse>(`/cv/history/${id}`);
+      return response.data;
+    }
   },
 
   /**
@@ -58,6 +63,7 @@ export const analysisService = {
 
     const existingSkillsByRole: Record<TargetRole, string[]> = {
       backend_developer: ['Git & GitHub', 'JavaScript / TypeScript', 'OOP Principles', 'Basic Linux CLI'],
+      frontend_reactjs: ['React', 'TypeScript', 'HTML/CSS', 'Git & GitHub'],
       data_analyst: ['Excel / Google Sheets', 'Basic SQL Queries', 'Data Cleaning', 'Descriptive Statistics'],
       ai_engineer: ['Python Fundamentals', 'Linear Algebra', 'Scikit-Learn Basics', 'Git Version Control'],
       digital_marketing_specialist: ['SEO Basics', 'Content Strategy', 'Social Media Analytics', 'Copywriting'],
@@ -110,6 +116,30 @@ export const analysisService = {
       existing_skills: existing,
       missing_skills: missing,
       gap_items: gapItems,
+      actionable_level_up_blueprint: {
+        role_context: role,
+        summary: `Lộ trình nâng level thực chiến cho vai trò ${role}.`,
+        required_skills_to_learn: gapItems.map((gap, index) => ({
+          skill_name: gap.skill_name,
+          axis_category: index % 2 === 0 ? 'technology' : 'system',
+          why_needed: gap.reason || 'Cần bổ sung để đạt chuẩn năng lực mục tiêu.',
+          priority: gap.severity === 'high' ? 'HIGH' : 'MEDIUM',
+        })),
+        practical_features_to_build: [
+          {
+            feature_title: 'Build a production-ready portfolio feature from the biggest skill gap',
+            project_context: `Practice project tailored for ${role}`,
+            technical_requirements: gapItems.slice(0, 3).map((gap) => gap.skill_name),
+            expected_learning_outcome: 'Có bằng chứng dự án rõ ràng để đưa vào CV và phỏng vấn.',
+          },
+        ],
+        english_improvement_roadmap: {
+          current_perceived_english: 'Basic Technical Reading',
+          target_english_benchmark: 'Read official docs and explain project trade-offs in English',
+          key_focus_areas: ['Read official documentation', 'Write technical project notes', 'Practice interview explanations'],
+          recommended_action: 'Dành 30 phút mỗi ngày đọc docs và viết lại quyết định kỹ thuật bằng tiếng Anh.',
+        },
+      },
       prioritized_actions: [
         {
           id: 'act_1',
@@ -139,3 +169,5 @@ export const analysisService = {
     };
   },
 };
+
+

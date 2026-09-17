@@ -338,6 +338,10 @@ export default function App() {
                 { subject: 'Độ khớp yêu cầu', score: res.scores?.match_percentage ?? 65, fullMark: 100 },
                 { subject: 'Kỹ năng cốt lõi', score: 80, fullMark: 100 },
               ],
+              actionableLevelUpBlueprint:
+                res.actionable_level_up_blueprint ||
+                res.part_2_cv_content_and_level_assessment?.actionable_level_up_blueprint ||
+                null,
             };
             setCvAnalysis(reloadedAnalysis);
             showToast(
@@ -877,3 +881,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -1,6 +1,7 @@
 export type TargetRole =
   | 'data_analyst'
   | 'backend_developer'
+  | 'frontend_reactjs'
   | 'ai_engineer'
   | 'digital_marketing_specialist';
 
@@ -55,7 +56,8 @@ export interface RoadmapResource {
 export interface GenerateRoadmapRequest {
   target_role: TargetRole;
   starting_level?: StartingLevel;
-  gap_items: RoadmapGapItem[];
+  gap_items?: RoadmapGapItem[];
+  actionable_level_up_blueprint?: unknown;
   resources?: RoadmapResource[];
 }
 
@@ -143,3 +145,5 @@ export interface RoadmapResponse {
   ai_generation_error?: string | null;
   resource_gap_alerts: ResourceGapAlert[];
 }
+
+

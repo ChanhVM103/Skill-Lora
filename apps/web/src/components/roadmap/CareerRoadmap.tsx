@@ -20,8 +20,23 @@ export const CareerRoadmap: React.FC<CareerRoadmapProps> = ({
   useEffect(() => {
     const loadRealRoadmap = async () => {
       try {
+        const normalizedCvRole = cvAnalysis?.targetRole?.toLowerCase() || '';
+        const blueprintRole = !Array.isArray(cvAnalysis?.actionableLevelUpBlueprint)
+          ? cvAnalysis?.actionableLevelUpBlueprint?.role_context?.toLowerCase() || ''
+          : '';
+        const roleText = `${normalizedCvRole} ${blueprintRole}`;
+        const targetRole = roleText.includes('frontend') || roleText.includes('react')
+          ? 'frontend_reactjs'
+          : roleText.includes('data')
+          ? 'data_analyst'
+          : roleText.includes('ai')
+          ? 'ai_engineer'
+          : 'backend_developer';
+
+        const blueprint = cvAnalysis?.actionableLevelUpBlueprint;
+        const shouldUseBlueprint = blueprint && !Array.isArray(blueprint);
         const gapItems =
-          cvAnalysis?.missingSkills && cvAnalysis.missingSkills.length > 0
+          !shouldUseBlueprint && cvAnalysis?.missingSkills && cvAnalysis.missingSkills.length > 0
             ? cvAnalysis.missingSkills.map((skill, idx) => ({
                 skill_id: `skill_${idx}`,
                 skill_name: skill,
@@ -30,13 +45,36 @@ export const CareerRoadmap: React.FC<CareerRoadmapProps> = ({
                 current_level: 'missing' as const,
                 target_level: 'intermediate' as const,
               }))
-            : roadmapService.getDefaultGapItems('backend_developer');
+            : roadmapService.getDefaultGapItems(targetRole);
 
         const liveData = await roadmapService.generateRoadmap({
-          target_role: 'backend_developer',
+          target_role: targetRole,
           starting_level: 'beginner',
-          gap_items: gapItems,
+          ...(shouldUseBlueprint
+            ? { actionable_level_up_blueprint: blueprint }
+            : { gap_items: gapItems }),
         });
+
+        if (liveData?.four_week_plan && liveData.four_week_plan.length > 0) {
+          const generated: RoadmapItem[] = liveData.four_week_plan.slice(0, 4).map((week, idx) => {
+            const firstLesson = week.lessons[0];
+            const firstVideo = firstLesson?.external_courses?.find((course) => course.provider === 'YouTube');
+            return {
+              id: `week_${week.week || idx + 1}`,
+              week: week.week || idx + 1,
+              title: week.theme,
+              description:
+                firstLesson
+                  ? `${firstLesson.activity} ${firstVideo ? `Video: ${firstVideo.note}` : firstLesson.practice}`
+                  : `Tập trung củng cố các kỹ năng: ${week.focus_skills.join(', ')}`,
+              completed: false,
+              estimatedHours: 10,
+              courseId: courses[idx % courses.length]?.id,
+            };
+          });
+          setRoadmapItems(generated);
+          return;
+        }
 
         if (liveData?.phases && liveData.phases.length > 0) {
           const generated: RoadmapItem[] = liveData.phases.map((p, idx) => ({
@@ -76,7 +114,7 @@ export const CareerRoadmap: React.FC<CareerRoadmapProps> = ({
         <div>
           <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/60 text-ueh-teal dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-semibold mb-2">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Được cá nhân hóa theo mục tiêu nghề nghiệp</span>
+            <span>{cvAnalysis?.actionableLevelUpBlueprint ? 'Sinh từ actionable_level_up_blueprint của CV' : 'Được cá nhân hóa theo mục tiêu nghề nghiệp'}</span>
           </div>
           <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
             Lộ Trình Phát Triển Năng Lực 6 Tuần
@@ -181,3 +219,5 @@ export const CareerRoadmap: React.FC<CareerRoadmapProps> = ({
     </div>
   );
 };
+
+

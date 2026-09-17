@@ -141,6 +141,60 @@ export const ROLE_REQUIREMENTS: Record<TargetRole, RoleProfileConfig> = {
       'Khai phá dữ liệu (Data Mining)',
     ],
   },
+  [TargetRole.FrontendReactjs]: {
+    role: TargetRole.FrontendReactjs,
+    title: 'Kỹ Sư Frontend ReactJS',
+    core_skills: [
+      {
+        skill_id: 'react_fiber_concurrent',
+        skill_name: 'React Fiber & Concurrent Rendering',
+        category: GapCategory.Core,
+        importance: 5,
+        target_level: 'advanced',
+        keywords: ['react', 'fiber', 'concurrent', 'usetransition', 'usedeferredvalue', 'server components'],
+      },
+      {
+        skill_id: 'web_vitals_bundle_splitting',
+        skill_name: 'Web Vitals Optimization & Bundle Splitting',
+        category: GapCategory.Core,
+        importance: 5,
+        target_level: 'advanced',
+        keywords: ['lcp', 'inp', 'cls', 'web vitals', 'bundle splitting', 'dynamic import', 'lighthouse'],
+      },
+      {
+        skill_id: 'frontend_testing_cicd',
+        skill_name: 'Playwright E2E, Visual Regression & CI/CD',
+        category: GapCategory.Portfolio,
+        importance: 4,
+        target_level: 'intermediate',
+        keywords: ['playwright', 'e2e', 'visual regression', 'github actions', 'ci/cd'],
+      },
+      {
+        skill_id: 'micro_frontend_architecture',
+        skill_name: 'Micro-Frontend & Module Federation Architecture',
+        category: GapCategory.AppliedProject,
+        importance: 4,
+        target_level: 'advanced',
+        keywords: ['micro-frontend', 'module federation', 'vite', 'webpack', 'shared state'],
+      },
+    ],
+    ats_keywords: [
+      'React',
+      'TypeScript',
+      'Web Vitals',
+      'Vite',
+      'Playwright',
+      'Micro-Frontend',
+      'Module Federation',
+      'Performance Optimization',
+    ],
+    prerequisite_courses: [
+      'Lập trình Web',
+      'Lập trình hướng đối tượng (OOP)',
+      'Cấu trúc dữ liệu & Giải thuật',
+      'Kiểm thử phần mềm',
+    ],
+  },
 
   [TargetRole.AiEngineer]: {
     role: TargetRole.AiEngineer,
@@ -224,3 +278,4 @@ export const ROLE_REQUIREMENTS: Record<TargetRole, RoleProfileConfig> = {
     prerequisite_courses: ['Nguyên lý Marketing', 'Nghiên cứu thị trường', 'Hành vi người tiêu dùng'],
   },
 };
+

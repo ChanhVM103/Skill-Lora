@@ -55,6 +55,46 @@ export interface CvAnalysis {
   missingSkills: string[];
   suggestedCourseIds: string[];
   radarScores: RadarMetric[];
+  actionableLevelUpBlueprint?: ActionableLevelUpBlueprint | ActionableLevelUpBlueprintItem[] | null;
+}
+
+export interface BlueprintSkill {
+  skill_name: string;
+  axis_category?: string;
+  why_needed?: string;
+  priority?: 'HIGH' | 'MEDIUM' | 'LOW' | string;
+}
+
+export interface BlueprintFeature {
+  feature_title: string;
+  project_context?: string;
+  technical_requirements?: string[];
+  expected_learning_outcome?: string;
+}
+
+export interface BlueprintEnglishRoadmap {
+  current_perceived_english?: string;
+  target_english_benchmark?: string;
+  key_focus_areas?: string[];
+  recommended_action?: string;
+}
+
+export interface ActionableLevelUpBlueprint {
+  role_context?: string;
+  summary?: string;
+  required_skills_to_learn?: BlueprintSkill[];
+  practical_features_to_build?: BlueprintFeature[];
+  english_improvement_roadmap?: BlueprintEnglishRoadmap;
+}
+
+export interface ActionableLevelUpBlueprintItem {
+  blueprint_id?: string;
+  feature_title?: string;
+  feature_difficulty?: string;
+  why_practical?: string;
+  required_skills_to_learn?: string[];
+  english_requirement?: string;
+  step_by_step_action?: string;
 }
 
 export interface AssessmentQuestion {
