@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateRoadmapRequestDto } from './dto/generate-roadmap-request.dto.js';
 import { RoadmapResponseDto } from './dto/roadmap-response.dto.js';
@@ -25,5 +25,13 @@ export class RoadmapController {
     @Body() request: GenerateRoadmapRequestDto,
   ): Promise<RoadmapResponseDto> {
     return this.roadmapService.generateRoadmap(request);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Lấy chi tiết lộ trình học tập (Roadmap) theo ID' })
+  @ApiResponse({ status: 200, type: RoadmapResponseDto })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy roadmap.' })
+  async getRoadmapById(@Param('id') id: string): Promise<RoadmapResponseDto> {
+    return this.roadmapService.getRoadmapById(id);
   }
 }
